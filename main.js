@@ -437,17 +437,21 @@ document.addEventListener('DOMContentLoaded', () => {
 					const timeEl = li.querySelector('.post-content .muted.small'); if (timeEl) timeEl.textContent = relativeTime(m.ts);
 					// author text intentionally omitted (use owner highlight instead)
 					const commentsEl = li.querySelector('.small-note'); if (commentsEl) commentsEl.textContent = `Comments (${(m.comments||[]).length})`;
-					const imgWrap = li.querySelector('.post-image');
-					if (m.image){
-						if (imgWrap){ const img = imgWrap.querySelector('img'); if (img) img.src = m.image; }
-						else {
-							const pc = li.querySelector('.post-content');
-							const div = document.createElement('div'); div.className = 'post-image'; div.innerHTML = `<img src="${m.image}" alt="post image"/>`;
-							pc.insertBefore(div, pc.firstChild);
+						const imgWrap = li.querySelector('.post-image');
+						if (m.image){
+							if (imgWrap){
+								const img = imgWrap.querySelector('img'); if (img) img.src = m.image;
+								// ensure the image block is a direct child of the li and placed before the content row
+								if (imgWrap.parentElement !== li){ imgWrap.remove(); li.insertBefore(imgWrap, li.firstChild); }
+							} else {
+								const div = document.createElement('div');
+								div.className = 'post-image';
+								div.innerHTML = `<img src="${m.image}" alt="post image"/>`;
+								li.insertBefore(div, li.firstChild);
+							}
+						} else {
+							if (imgWrap) imgWrap.remove();
 						}
-					} else {
-						if (imgWrap) imgWrap.remove();
-					}
 					if (owned.includes(m.id)) li.classList.add('owner'); else li.classList.remove('owner');
 					// ensure order
 					const currentChild = messagesEl.children[idx];
@@ -465,11 +469,10 @@ document.addEventListener('DOMContentLoaded', () => {
 									<button data-id="${m.id}" class="vote-down">▼</button>
 								</div>
 								<div class="post-content">
-									${m.image ? `<div class="post-image"><img src="${m.image}" alt="post image"/></div>` : ''}
-													<div style="display:flex;flex-direction:column;align-items:flex-start">
-														<div class="muted small">${relativeTime(m.ts)}</div>
-														<strong>${renderMarkdown(m.title)}</strong>
-													</div>
+									<div style="display:flex;flex-direction:column;align-items:flex-start">
+										<div class="muted small">${relativeTime(m.ts)}</div>
+										<strong>${renderMarkdown(m.title)}</strong>
+									</div>
 									<div style="margin-top:8px" class="small-note">Comments (${(m.comments||[]).length})</div>
 								</div>
 							</div>
@@ -624,23 +627,23 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (modal) return modal;
 		modal = document.createElement('div');
 		modal.id = 'post-modal';
-		modal.innerHTML = `
-			<div class="modal-backdrop" id="post-modal-backdrop"></div>
-			<div class="modal-content" id="post-modal-content">
-				<button id="post-modal-close" class="primary" style="position:absolute;right:12px;top:12px;background:#fff;color:#111;border:1px solid #e6e8ee">Close</button>
-				<div id="post-modal-body"></div>
-			</div>
-		`;
-		document.body.appendChild(modal);
-		document.getElementById('post-modal-close').addEventListener('click', closePostModal);
-		document.getElementById('post-modal-backdrop').addEventListener('click', closePostModal);
-		return modal;
-	}
-
-	function closePostModal(){
-			// clear any modal refresh polling
-			if (MODAL_REFRESH){ clearInterval(MODAL_REFRESH); MODAL_REFRESH = null; }
-			const modal = document.getElementById('post-modal');
+				li.innerHTML = `
+						${m.image ? `<div class="post-image"><img src="${m.image}" alt="post image"/></div>` : ''}
+						<div style="display:flex;gap:12px;align-items:flex-start">
+							<div class="vote-box">
+								<button data-id="${m.id}" class="vote-up">▲</button>
+								<div class="vote-count">${score}</div>
+								<button data-id="${m.id}" class="vote-down">▼</button>
+							</div>
+							<div class="post-content">
+								<div style="display:flex;flex-direction:column;align-items:flex-start">
+									<div class="muted small">${relativeTime(m.ts)}</div>
+									<strong>${renderMarkdown(m.title)}</strong>
+								</div>
+								<div style="margin-top:8px" class="small-note">Comments (${(m.comments||[]).length})</div>
+							</div>
+						</div>
+				`;
 			if (modal) modal.remove();
 	}
 
