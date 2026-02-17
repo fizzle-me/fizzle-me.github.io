@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+	const API_BASE = "http://fizzle-backend.up.railway.app:8080";
+
 	const landing = document.getElementById('landing-choices');
 	const app = document.getElementById('message-app');
 	const signedInAs = document.getElementById('signed-in-as');
@@ -9,9 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	const postPanel = document.getElementById('post-panel');
 	const titleCount = document.getElementById('title-count');
 	const formatToolbar = document.getElementById('format-toolbar');
-
-	const API_BASE = "http://fizzle-backend-production.up.railway.app:5000";
-
 
 	// global search implementation: fetch all messages then filter locally
 	async function performSearch(query){
