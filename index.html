@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script defer src="https://track.leftclick.site/script.js" data-website-id="c1a950f5-8624-44fd-bbb1-b7d58a476dff"></script> 
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Fizzle — Welcome</title>
+	<link rel="stylesheet" href="style.css">
+	<style>
+		.landing-choices{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+		.landing-choices a.primary{display:inline-block;text-align:center}
+		.landing-sub{background:#fff;color:var(--accent);border:1px solid #e6e8ee}
+	</style>
+</head>
+<body>
+	<main class="center">
+		<section class="card main-menu">
+			<header class="card-header">
+				<h1>Welcome to Fizzle</h1>
+				<p class="muted">Choose an action to continue</p>
+			</header>
+			<div id="app-root">
+				<div class="landing-choices" id="landing-choices">
+					<a class="primary" href="signup/">Create account</a>
+					<a class="primary landing-sub" href="signin/">Sign in</a>
+				</div>
+
+				<div id="message-app" style="display:none">
+					<div style="display:flex;justify-content:space-between;align-items:center">
+						<div id="signed-in-as" class="muted small"></div>
+						<button id="signoutBtn" class="primary" style="background:#fff;color:var(--accent);border:1px solid #e6e8ee">Sign out</button>
+					</div>
+					<!-- New post dropdown -->
+					<div class="new-post">
+						<button id="toggle-post" class="primary" type="button">New post ▾</button>
+						<div id="post-panel" class="post-panel" style="display:none;margin-top:12px">
+							<form id="message-form">
+								<!-- moved image chooser to top and added preview -->
+								<div style="display:flex;gap:8px;align-items:center">
+									<label for="message-image" class="file-btn">Choose image</label>
+									<input id="message-image" type="file" accept="image/*" style="display:none" />
+									<span id="message-image-name" class="muted small"></span>
+								</div>
+								<div style="margin-top:8px">
+									<img id="message-image-preview" src="" alt="preview" />
+								</div>
+								<label for="message-title">Title <span id="title-count" class="muted small">(0/100)</span></label>
+								<input id="message-title" maxlength="100" placeholder="Post title (max 100 chars)" class="input" />
+								<label for="message-body">Body <span id="body-count" class="muted small">(0/3000)</span></label>
+								<div class="toolbar" id="format-toolbar">
+									<button type="button" data-insert="**bold**">B</button>
+									<button type="button" data-insert="*italic*">I</button>
+									<button type="button" data-insert="[link](https://)">Link</button>
+									<button type="button" data-insert="`code`">Code</button>
+								</div>
+								<textarea id="message-body" placeholder="Write the body (markdown supported)" rows="5" class="input" maxlength="3000"></textarea>
+
+								<div style="margin-top:8px"><button id="postBtn" class="primary" type="submit">Post</button></div>
+							</form>
+						</div>
+					</div>
+					<h3 style="margin-top:16px">Messages</h3>
+					<div style="margin-top:12px">
+						Sort: <select id="sort-select"><option value="trending">Trending</option><option value="new">New</option><option value="top">Top</option></select>
+					</div>
+					<div id="pagination" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+						<div id="pageButtons"></div>
+						<div id="pageInfo" class="muted small" style="margin-left:8px"></div>
+					</div>
+					<ul id="messages" class="fields"></ul>
+					<div id="bottomPagination" style="display:flex;gap:8px;align-items:center;margin-top:12px">
+						<div id="pageButtonsBottom"></div>
+						<div id="pageInfoBottom" class="muted small" style="margin-left:8px"></div>
+						<button id="backToTop" class="page-btn" style="display:none">Back to top</button>
+					</div>
+					<!-- spacer used to allow centering the page bottom in viewport -->
+					<div id="bottomSpacer" style="height:50vh"></div>
+				</div>
+			</div>
+		</section>
+	</main>
+	<script src="main.js"></script>
+</body>
+</html>

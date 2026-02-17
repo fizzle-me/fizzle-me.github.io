@@ -1,0 +1,148 @@
+:root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --accent:#2563eb;
+    --danger:#dc2626;
+    --radius:10px;
+    --max-width:420px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+    margin:0;
+    font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background:linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+    color:#111827;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:32px 32px;
+    min-height:100vh;
+}
+
+.center{width:100%;display:flex;align-items:center;justify-content:center}
+.card{
+    background:var(--card);
+    width:100%;
+    max-width:var(--max-width);
+    border-radius:var(--radius);
+    box-shadow:0 8px 30px rgba(17,24,39,0.08);
+    padding:24px;
+}
+/* Landing/main menu should take the full available width inside the page padding */
+.card.main-menu{max-width:100%;}
+
+/* Make landing choice buttons expand to the card width */
+.landing-choices a.primary{display:block;width:100%;}
+.card-header h1{margin:0;font-size:20px}
+.card-header .muted{margin-top:6px;color:var(--muted);font-size:13px}
+
+.fields{list-style:none;padding:0;margin:18px 0 0}
+.field{margin-bottom:14px}
+.field label{display:block;margin-bottom:8px;color:#374151;font-weight:600;font-size:13px}
+
+input[type="text"],
+input[type="email"],
+input[type="password"]{
+    width:100%;
+    padding:12px 12px;
+    border-radius:8px;
+    border:1px solid #e6e8ee;
+    background: #fff;
+    font-size:15px;
+    transition:box-shadow .18s ease, border-color .18s ease;
+}
+
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 6px 18px rgba(37,99,235,0.08)}
+
+.password-field{position:relative}
+.password-field .toggle-password{
+    position:absolute;right:8px;top:36px;padding:6px 8px;border-radius:6px;border:none;background:transparent;color:var(--accent);cursor:pointer;font-size:13px
+}
+
+.muted{color:var(--muted)}
+.small{font-size:12px}
+
+.actions{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.primary{
+    background:var(--accent);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:600;font-size:15px
+}
+.primary:disabled{opacity:.6;cursor:not-allowed}
+
+/* Message app polish */
+.new-post{display:flex;flex-direction:column}
+.post-panel{background:#fff;border:1px solid #eef2ff;padding:12px;border-radius:8px}
+.input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e8ee;background:#fff;margin-bottom:8px}
+#message-image-preview{width:220px;height:140px;display:none;border-radius:8px;object-fit:cover}
+.toolbar{display:flex;gap:6px;margin-bottom:8px}
+.toolbar button{padding:6px 8px;border-radius:6px;border:1px solid #e6e8ee;background:#fafafa;cursor:pointer}
+.toolbar button:hover{background:#f0f8ff}
+
+.file-btn{display:inline-block;padding:8px 10px;border-radius:8px;border:1px solid #e6e8ee;background:#fafafa;cursor:pointer;color:var(--accent);font-weight:600}
+.file-btn:hover{background:#f0f8ff}
+
+/* styled sort select to match site */
+#sort-select{padding:8px 10px;border-radius:8px;border:1px solid #e6e8ee;background:#fff;color:#111827;font-weight:600}
+#sort-select:focus{outline:none;box-shadow:0 6px 18px rgba(37,99,235,0.06);border-color:var(--accent)}
+
+.fields{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-direction:column;gap:12px}
+.field{margin:0;background:#fff;border-radius:10px;padding:12px;border:1px solid #eef2ff;display:flex;gap:12px}
+.post-content{flex:1}
+.post-image{width:100%;overflow:hidden;border-radius:8px}
+.post-image img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:8px}
+
+/* allow scrolling far enough so bottom of content can be centered on screen
+    (we use a spacer element placed after the bottom controls instead of padding) */
+#messages{padding-bottom:12px}
+
+/* bottom pagination/back-to-top area */
+#bottomPagination{display:none;align-items:center;gap:8px;margin-top:12px}
+#backToTop{margin-left:auto}
+
+/* modal internal back-to-top */
+.modal-back-to-top{margin-top:8px}
+.vote-box{width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;border-radius:8px;padding:6px;border:1px solid #f1f5f9}
+.vote-box button{background:transparent;border:none;cursor:pointer;font-size:16px;padding:4px;color:var(--muted)}
+.vote-count{font-weight:700;margin:4px 0;color:#111827}
+.muted.small{color:var(--muted)}
+.vote-box.voted-up{background:linear-gradient(180deg,#ecfeff 0%,#e6f9ff 100%);border-color:rgba(14,165,233,0.16)}
+.vote-box.voted-down{background:linear-gradient(180deg,#fff1f2 0%,#fff6f7 100%);border-color:rgba(220,38,38,0.08)}
+.vote-box.voted-up .vote-up{color:#0ea5e9;font-weight:700}
+.vote-box.voted-down .vote-down{color:#dc2626;font-weight:700}
+
+/* comment vote button highlights */
+.comment-vote-up.voted-up{color:#0ea5e9;font-weight:700}
+.comment-vote-down.voted-down{color:#dc2626;font-weight:700}
+
+.small-note{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* Modal fullscreen post */
+#post-modal{position:fixed;inset:0;z-index:9999}
+#post-modal .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45)}
+#post-modal .modal-content{position:fixed;left:24px;right:24px;top:24px;bottom:24px;max-width:960px;margin:auto;background:transparent;border-radius:10px;overflow:auto}
+
+/* modal post layout tweaks */
+.modal-post-image{width:100%;margin-bottom:12px}
+.modal-post-image img{width:100%;height:auto;object-fit:cover;border-radius:8px;display:block}
+.modal-post-content{flex:1;min-width:0}
+.modal-vote-area{flex:0 0 80px;display:flex;align-items:flex-start;justify-content:center}
+.modal-vote-area .vote-box{width:64px}
+
+/* page selector buttons (pagination) */
+.page-btn{background:#fff;color:var(--accent);border:1px solid rgba(37,99,235,0.16);padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+.page-btn.page-active{background:var(--accent);color:#fff;border:1px solid transparent;font-weight:700}
+
+.field.owner{box-shadow:0 6px 18px rgba(14,165,233,0.06);border-color:rgba(14,165,233,0.12);background:linear-gradient(180deg,#f0fbff 0%, #eef9ff 100%);}
+
+
+.error{color:var(--danger);font-size:13px;margin-top:6px;min-height:18px}
+.checkbox input{margin-right:8px}
+
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+@media (max-width:480px){
+    .card{padding:18px;border-radius:12px}
+}
