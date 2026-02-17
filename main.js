@@ -41,9 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
 							<button data-id="${m.id}" class="vote-down">▼</button>
 						</div>
 						<div class="post-content">
-							<div style="display:flex;justify-content:space-between;align-items:center">
-									<strong>${renderMarkdown(m.title)}</strong>
-									<div class="muted small">${relativeTime(m.ts)}</div>
+							<div style="display:flex;flex-direction:column;align-items:flex-start">
+								<div class="muted small">${relativeTime(m.ts)}</div>
+								<strong>${renderMarkdown(m.title)}</strong>
 							</div>
 								<div style="margin-top:8px" class="small-note">Comments (${(m.comments||[]).length})</div>
 						</div>
@@ -466,10 +466,10 @@ document.addEventListener('DOMContentLoaded', () => {
 								</div>
 								<div class="post-content">
 									${m.image ? `<div class="post-image"><img src="${m.image}" alt="post image"/></div>` : ''}
-									<div style="display:flex;justify-content:space-between;align-items:center">
-										<strong>${renderMarkdown(m.title)}</strong>
-										<div class="muted small">${relativeTime(m.ts)}</div>
-									</div>
+													<div style="display:flex;flex-direction:column;align-items:flex-start">
+														<div class="muted small">${relativeTime(m.ts)}</div>
+														<strong>${renderMarkdown(m.title)}</strong>
+													</div>
 									<div style="margin-top:8px" class="small-note">Comments (${(m.comments||[]).length})</div>
 								</div>
 							</div>
