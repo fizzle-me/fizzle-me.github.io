@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				password: fields.password.value
 			};
 
-			const API_BASE = (window.BACKEND_URL || (location.hostname ? (location.protocol + '//' + location.hostname + ':5000') : 'http://localhost:5000'));
 			console.log('Signing up to', API_BASE + '/api/signup', payload.email);
 
 			fetch(API_BASE + '/api/signup', {
