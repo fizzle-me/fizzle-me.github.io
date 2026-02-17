@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const API_BASE = "http://fizzle-backend.up.railway.app:8080";
+	const API_BASE = "https://fizzle-backend.up.railway.app:8080";
 
 	const form = document.getElementById('signup');
 	const submitBtn = document.getElementById('submitBtn');
