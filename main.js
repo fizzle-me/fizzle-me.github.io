@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const titleCount = document.getElementById('title-count');
 	const formatToolbar = document.getElementById('format-toolbar');
 
-	const API_BASE = "https://fizzle-backend-production.up.railway.app:5000";
+	const API_BASE = "http://fizzle-backend-production.up.railway.app:5000";
 
 
 	// global search implementation: fetch all messages then filter locally

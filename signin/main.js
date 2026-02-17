@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const API_BASE = "https://fizzle-backend-production.up.railway.app:5000";
-	
+	const API_BASE = "http://fizzle-backend-production.up.railway.app:5000";
+
 	const form = document.getElementById('signin');
 	const submitBtn = document.getElementById('submitBtn');
 	const fields = {

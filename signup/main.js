@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		password: document.getElementById('password')
 	};
 
-	const API_BASE = "https://fizzle-backend-production.up.railway.app:5000";
+	const API_BASE = "http://fizzle-backend-production.up.railway.app:5000";
 
 	// If already remembered on the backend, skip signup page and go to main
 	(async function checkRemembered(){
