@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const API_BASE = "https://fizzle-backend.up.railway.app:8080";
+	const API_BASE = "https://fizzle-backend.up.railway.app";
 
 	const landing = document.getElementById('landing-choices');
 	const app = document.getElementById('message-app');
