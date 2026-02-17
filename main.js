@@ -10,9 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const titleCount = document.getElementById('title-count');
 	const formatToolbar = document.getElementById('format-toolbar');
 
-	// Determine API base URL: prefer explicit `window.BACKEND_URL`, then the page origin
-	// (useful when frontend is served by the backend), otherwise fall back to localhost:5000
-	const API_BASE = (window.BACKEND_URL || (location.origin && location.origin !== 'null' ? location.origin : 'http://localhost:5000'));
+	const API_BASE = "https://fizzle-backend-production.up.railway.app:5000";
 
 
 	// global search implementation: fetch all messages then filter locally
