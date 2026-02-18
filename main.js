@@ -34,22 +34,27 @@ document.addEventListener('DOMContentLoaded', () => {
 				li.className = 'field';
 				li.setAttribute('data-id', String(m.id));
 				li.innerHTML = `
-					<div style="display:flex;gap:12px;align-items:flex-start">
-						<div class="vote-box">
-							<button data-id="${m.id}" class="vote-up">▲</button>
-							<div class="vote-count">${score}</div>
-							<button data-id="${m.id}" class="vote-down">▼</button>
-						</div>
-						<div class="post-content">
-							<div style="display:flex;flex-direction:column;align-items:flex-start">
-								<div class="muted small">${relativeTime(m.ts)}</div>
-								<strong>${renderMarkdown(m.title)}</strong>
+						<div style="display:flex;gap:12px;align-items:flex-start">
+							<div class="vote-box">
+								<button data-id="${m.id}" class="vote-up">▲</button>
+								<div class="vote-count">${score}</div>
+								<button data-id="${m.id}" class="vote-down">▼</button>
 							</div>
-								<div style="margin-top:8px" class="small-note">Comments (${(m.comments||[]).length})</div>
+							<div class="post-content">
+								<div style="display:flex;flex-direction:column;align-items:flex-start">
+									<div class="muted small">${relativeTime(m.ts)}</div>
+									<strong>${renderMarkdown(m.title)}</strong>
+								</div>
+							</div>
 						</div>
-					</div>
 				`;
 				messagesEl.appendChild(li);
+				// insert image preview if present
+				const imgWrapSearch = li.querySelector('.post-image');
+				if (m.image){
+					if (imgWrapSearch){ const img = imgWrapSearch.querySelector('img'); if (img) img.src = m.image; if (imgWrapSearch.parentElement !== li){ imgWrapSearch.remove(); li.insertBefore(imgWrapSearch, li.firstChild); } }
+					else { const div = document.createElement('div'); div.className = 'post-image'; div.innerHTML = `<img src=\"${m.image}\" alt=\"post image\"/>`; li.insertBefore(div, li.firstChild); }
+				} else { if (imgWrapSearch) imgWrapSearch.remove(); }
 				// attach vote handlers similarly
 				const vb = li.querySelector('.vote-box');
 				const up = vb && vb.querySelector('.vote-up');
@@ -436,8 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					const titleEl = li.querySelector('strong'); if (titleEl) titleEl.innerHTML = renderMarkdown(m.title);
 					const timeEl = li.querySelector('.post-content .muted.small'); if (timeEl) timeEl.textContent = relativeTime(m.ts);
 					// author text intentionally omitted (use owner highlight instead)
-					const commentsEl = li.querySelector('.small-note'); if (commentsEl) commentsEl.textContent = `Comments (${(m.comments||[]).length})`;
-						const imgWrap = li.querySelector('.post-image');
+					const imgWrap = li.querySelector('.post-image');
 						if (m.image){
 							if (imgWrap){
 								const img = imgWrap.querySelector('img'); if (img) img.src = m.image;
@@ -473,7 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
 										<div class="muted small">${relativeTime(m.ts)}</div>
 										<strong>${renderMarkdown(m.title)}</strong>
 									</div>
-									<div style="margin-top:8px" class="small-note">Comments (${(m.comments||[]).length})</div>
 								</div>
 							</div>
 					`;
@@ -483,6 +486,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					// insert at correct position
 					const ref = messagesEl.children[idx] || null;
 					messagesEl.insertBefore(li, ref);
+					// insert image preview if present (small preview at top)
+					const imgWrapNew = li.querySelector('.post-image');
+					if (m.image){
+						if (imgWrapNew){ const img = imgWrapNew.querySelector('img'); if (img) img.src = m.image; if (imgWrapNew.parentElement !== li){ imgWrapNew.remove(); li.insertBefore(imgWrapNew, li.firstChild); } }
+						else { const div = document.createElement('div'); div.className = 'post-image'; div.innerHTML = `<img src="${m.image}" alt="post image"/>`; li.insertBefore(div, li.firstChild); }
+					} else { if (imgWrapNew) imgWrapNew.remove(); }
 					// ensure vote box sits on the right side
 					const vbNew = li.querySelector('.vote-box');
 					if (vbNew){ vbNew.style.marginLeft = ''; vbNew.style.alignSelf = ''; }
@@ -623,33 +632,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Modal for fullscreen post view (comments allowed only here)
 	function ensureModal(){
-		let modal = document.getElementById('post-modal');
-		if (modal) return modal;
-		modal = document.createElement('div');
-		modal.id = 'post-modal';
-				li.innerHTML = `
-						${m.image ? `<div class="post-image"><img src="${m.image}" alt="post image"/></div>` : ''}
-						<div style="display:flex;gap:12px;align-items:flex-start">
-							<div class="vote-box">
-								<button data-id="${m.id}" class="vote-up">▲</button>
-								<div class="vote-count">${score}</div>
-								<button data-id="${m.id}" class="vote-down">▼</button>
-							</div>
-							<div class="post-content">
-								<div style="display:flex;flex-direction:column;align-items:flex-start">
-									<div class="muted small">${relativeTime(m.ts)}</div>
-									<strong>${renderMarkdown(m.title)}</strong>
-								</div>
-								<div style="margin-top:8px" class="small-note">Comments (${(m.comments||[]).length})</div>
-							</div>
-						</div>
-				`;
-			if (modal) modal.remove();
+	    let modal = document.getElementById('post-modal');
+	    if (modal) return modal;
+	    modal = document.createElement('div');
+	    modal.id = 'post-modal';
+	    modal.style.position = 'fixed';
+	    modal.style.inset = '0';
+	    modal.style.display = 'none';
+	    modal.style.zIndex = '10000';
+	    modal.style.background = 'rgba(0,0,0,0.5)';
+	    modal.innerHTML = `
+	        <div id="post-modal-content" style="overflow:auto;height:100%;padding:20px;box-sizing:border-box;display:flex;align-items:flex-start;justify-content:center;">
+	            <div id="post-modal-body" style="width:100%;max-width:1100px"></div>
+	        </div>
+	        <button id="post-modal-close" aria-label="Close post" style="position:fixed;top:12px;right:12px;z-index:10001;padding:8px 10px">Close</button>
+	    `;
+	    document.body.appendChild(modal);
+	    const closeBtn = document.getElementById('post-modal-close');
+	    closeBtn.addEventListener('click', ()=>{ modal.style.display = 'none'; if (MODAL_REFRESH) clearInterval(MODAL_REFRESH); });
+	    modal.addEventListener('click', (e)=>{ if (e.target === modal){ modal.style.display = 'none'; if (MODAL_REFRESH) clearInterval(MODAL_REFRESH); } });
+	    return modal;
 	}
 
 
 	 async function openPostModal(m){
-	 		ensureModal();
+	 		const modal = ensureModal();
+	 		modal.style.display = 'block';
 	 		// fetch latest copy of message (includes fresh comments and your_vote)
 	 		const fresh = await fetchMessageById(m.id) || m;
 	 		m = fresh;
