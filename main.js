@@ -34,21 +34,25 @@ document.addEventListener('DOMContentLoaded', () => {
 				li.className = 'field';
 				li.setAttribute('data-id', String(m.id));
 				li.innerHTML = `
+						<!-- image (inserted separately if present) -->
 						<div style="display:flex;gap:12px;align-items:flex-start">
-							<div class="vote-box">
+							<div class="vote-box" style="display:flex;flex-direction:column;align-items:center;">
 								<button data-id="${m.id}" class="vote-up">▲</button>
 								<div class="vote-count">${score}</div>
 								<button data-id="${m.id}" class="vote-down">▼</button>
 							</div>
-							<div class="post-content">
+							<div class="post-content" style="flex:1;min-width:0">
 								<div style="display:flex;flex-direction:column;align-items:flex-start">
 									<div class="muted small">${relativeTime(m.ts)}</div>
-									<strong>${renderMarkdown(m.title)}</strong>
+									<strong style="word-break:break-word">${renderMarkdown(m.title)}</strong>
+									<div class="owner-note small-note" style="margin-top:8px;color:#0ea5e9;font-weight:600;display:none">You</div>
 								</div>
 							</div>
 						</div>
 				`;
 				messagesEl.appendChild(li);
+				// show owner indicator for search results
+				try{ const ownedLocal = JSON.parse(localStorage.getItem('fizzle_owned')||'[]'); const ownerNote = li.querySelector('.owner-note'); if (ownerNote) ownerNote.style.display = (ownedLocal.includes(m.id) ? '' : 'none'); }catch(e){}
 				// insert image preview if present
 				const imgWrapSearch = li.querySelector('.post-image');
 				if (m.image){
@@ -456,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						} else {
 							if (imgWrap) imgWrap.remove();
 						}
-					if (owned.includes(m.id)) li.classList.add('owner'); else li.classList.remove('owner');
+					if (owned.includes(m.id)) { li.classList.add('owner'); const on = li.querySelector('.owner-note'); if (on) on.style.display = ''; } else { li.classList.remove('owner'); const on = li.querySelector('.owner-note'); if (on) on.style.display = 'none'; }
 					// ensure order
 					const currentChild = messagesEl.children[idx];
 					if (currentChild !== li) messagesEl.insertBefore(li, currentChild || null);
@@ -466,21 +470,27 @@ document.addEventListener('DOMContentLoaded', () => {
 					li.className = 'field';
 					li.setAttribute('data-id', id);
 					li.innerHTML = `
+							<!-- image inserted above when present -->
 							<div style="display:flex;gap:12px;align-items:flex-start">
-								<div class="vote-box">
+								<div class="vote-box" style="display:flex;flex-direction:column;align-items:center;">
 									<button data-id="${m.id}" class="vote-up">▲</button>
 									<div class="vote-count">${score}</div>
 									<button data-id="${m.id}" class="vote-down">▼</button>
 								</div>
-								<div class="post-content">
+								<div class="post-content" style="flex:1;min-width:0">
 									<div style="display:flex;flex-direction:column;align-items:flex-start">
 										<div class="muted small">${relativeTime(m.ts)}</div>
-										<strong>${renderMarkdown(m.title)}</strong>
+										<strong style="word-break:break-word">${renderMarkdown(m.title)}</strong>
+										<div class="owner-note small-note" style="margin-top:8px;color:#0ea5e9;font-weight:600;display:none">You</div>
 									</div>
 								</div>
 							</div>
 					`;
-					if (owned.includes(m.id)) li.classList.add('owner');
+					if (owned.includes(m.id)) {
+						li.classList.add('owner');
+						const on = li.querySelector('.owner-note'); if (on) on.style.display = '';
+					}
+					else { const on = li.querySelector('.owner-note'); if (on) on.style.display = 'none'; }
 					// click to open modal
 					li.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea')) return; openPostModal(m); });
 					// insert at correct position
