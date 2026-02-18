@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			searchWrap.id = 'global-search-wrap';
 			searchWrap.style.display = 'flex';
 			searchWrap.style.gap = '8px';
+			searchWrap.style.alignItems = 'center';
 			searchWrap.style.marginBottom = '12px';
 			searchWrap.innerHTML = `
 				<input id="global-search-input" class="input" placeholder="Search messages and comments..." style="flex:1" />
@@ -100,7 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
 					const h = Math.ceil(sInput.getBoundingClientRect().height);
 					if (h > 0){
 						sBtn.style.height = h + 'px';
-						if (rBtn) rBtn.style.height = h + 'px';
+						sBtn.style.lineHeight = h + 'px';
+						sBtn.style.padding = '0 10px';
+						if (rBtn){ rBtn.style.height = h + 'px'; rBtn.style.lineHeight = h + 'px'; rBtn.style.padding = '0 10px'; }
 					}
 				});
 			}
@@ -375,6 +378,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			// refresh message cache and diff-update DOM to avoid blinking
 			const all = data.messages || [];
 			const total = all.length;
+			// show placeholder when there are no comments
+			if (total === 0){
+				if (list) list.innerHTML = '<div class="small-note">No comments yet — be the first to comment.</div>';
+				if (commentsPagesEl) commentsPagesEl.style.display = 'none';
+				const commentsPagesBottomEl = document.getElementById('modal-comments-pages-bottom');
+				if (commentsPagesBottomEl) commentsPagesBottomEl.style.display = 'none';
+				return;
+			}
 			const start = page * PAGE_SIZE;
 			const slice = all.slice(start, start + PAGE_SIZE);
 			// build maps of existing items
@@ -762,19 +773,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		commentsWrap.style.marginTop = '12px';
 		commentsWrap.innerHTML = `
 			<h3>Comments (${(m.comments||[]).length})</h3>
-			<!-- post toggle placed directly under comments header -->
-			<div style="margin-top:8px;margin-bottom:8px">
-				<button id="modal-comment-toggle" class="primary" type="button">Post a comment ▾</button>
-				<div id="modal-comment-top-panel" style="display:none;margin-top:8px">
-					<form id="modal-comment-top-form">
-						<div style="display:flex;justify-content:space-between;align-items:center">
-							<textarea id="modal-comment-top-text" rows="3" class="input" placeholder="Add a comment" maxlength="200"></textarea>
-							<span id="modal-comment-top-count" class="muted small">(0/200)</span>
-						</div>
-						<div style="margin-top:8px"><button id="modal-comment-top-post" class="primary" type="submit">Post comment</button></div>
-					</form>
-				</div>
-			</div>
 			<div style="display:flex;justify-content:space-between;align-items:center">
 				<div>
 					<label style="font-size:0.9rem">Sort: 
