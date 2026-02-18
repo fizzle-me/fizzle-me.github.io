@@ -91,14 +91,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			const rBtn = document.getElementById('global-search-reset');
 			const sInput = document.getElementById('global-search-input');
 			// make search buttons slightly smaller so they don't dominate UI
-			if (sBtn){ sBtn.style.padding = '6px 10px'; sBtn.style.fontSize = '0.9rem'; }
-			if (rBtn){ rBtn.style.padding = '6px 10px'; rBtn.style.fontSize = '0.9rem'; }
+			if (sBtn){ sBtn.style.padding = '6px 10px'; sBtn.style.fontSize = '0.9rem'; sBtn.style.display = 'inline-flex'; sBtn.style.alignItems = 'center'; sBtn.style.boxSizing = 'border-box'; }
+			if (rBtn){ rBtn.style.padding = '6px 10px'; rBtn.style.fontSize = '0.9rem'; rBtn.style.display = 'inline-flex'; rBtn.style.alignItems = 'center'; rBtn.style.boxSizing = 'border-box'; }
 			if (sInput){ sInput.style.fontSize = '0.95rem'; }
-			// make search/reset buttons match the input height
+			// set search/reset buttons to exactly match the input height after layout
 			if (sInput && sBtn){
-				const h = Math.ceil(sInput.getBoundingClientRect().height);
-				sBtn.style.height = h + 'px';
-				if (rBtn) rBtn.style.height = h + 'px';
+				requestAnimationFrame(() => {
+					const h = Math.ceil(sInput.getBoundingClientRect().height);
+					if (h > 0){
+						sBtn.style.height = h + 'px';
+						if (rBtn) rBtn.style.height = h + 'px';
+					}
+				});
 			}
 			if (sBtn){ sBtn.addEventListener('click', ()=>{ const q = (sInput && sInput.value||'').trim(); if (q) performSearch(q); }); }
 			if (rBtn){ rBtn.addEventListener('click', ()=>{ if (sInput) sInput.value = ''; loadMessages(PAGE); }); }
