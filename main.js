@@ -1,49 +1,49 @@
-	document.addEventListener('DOMContentLoaded', () => {
-		const API_BASE = "https://fizzle-backend.up.railway.app";
+document.addEventListener('DOMContentLoaded', () => {
+	const API_BASE = "https://fizzle-backend.up.railway.app";
 
-		// --- Auth0 configuration (replace these with your values) ---
-		const AUTH0_DOMAIN = 'dev-x84kenbbkvst5xz0.us.auth0.com'; // e.g. dev-abc123.us.auth0.com
-		const AUTH0_CLIENT_ID = 'xqI63wBjWnIaigUhxgAjzDa3Ey93P4pG';
-		const AUTH0_AUDIENCE = 'https://Fizzle-API'; // e.g. https://fizzle-api
-		let auth0 = null;
+	// --- Auth0 configuration (replace these with your values) ---
+	const AUTH0_DOMAIN = 'dev-x84kenbbkvst5xz0.us.auth0.com'; // e.g. dev-abc123.us.auth0.com
+	const AUTH0_CLIENT_ID = 'xqI63wBjWnIaigUhxgAjzDa3Ey93P4pG';
+	const AUTH0_AUDIENCE = 'https://Fizzle-API'; // e.g. https://fizzle-api
+	let auth0 = null;
 
-		async function initAuth(){
-			if (typeof createAuth0Client !== 'function'){
-				console.warn('Auth0 SDK not loaded. Add <script src="https://cdn.auth0.com/js/auth0-spa-js/1.27.0/auth0-spa-js.production.js"></script> to your HTML.');
-				return;
-			}
-			auth0 = await createAuth0Client({
-				domain: AUTH0_DOMAIN,
-				client_id: AUTH0_CLIENT_ID,
-				audience: AUTH0_AUDIENCE,
-				cacheLocation: 'localstorage'
-			});
-			// handle redirect callback from Auth0
-			if (window.location.search.includes('code=') && window.location.search.includes('state=')){
-				try{ await auth0.handleRedirectCallback(); }catch(e){ console.warn('Auth0 callback handling failed', e); }
-				history.replaceState({}, document.title, '/');
-			}
+	async function initAuth(){
+		if (typeof createAuth0Client !== 'function'){
+			console.warn('Auth0 SDK not loaded. Add <script src="https://cdn.auth0.com/js/auth0-spa-js/1.27.0/auth0-spa-js.production.js"></script> to your HTML.');
+			return;
 		}
+		auth0 = await createAuth0Client({
+			domain: AUTH0_DOMAIN,
+			client_id: AUTH0_CLIENT_ID,
+			audience: AUTH0_AUDIENCE,
+			cacheLocation: 'localstorage'
+		});
+		// handle redirect callback from Auth0
+		if (window.location.search.includes('code=') && window.location.search.includes('state=')){
+			try{ await auth0.handleRedirectCallback(); }catch(e){ console.warn('Auth0 callback handling failed', e); }
+			history.replaceState({}, document.title, '/');
+		}
+	}
 
-		// Override global fetch to attach Authorization header when we have an access token.
-		// Falls back to existing credentialed cookie requests when no token is available.
-		(function overrideFetch(){
-			const _fetch = window.fetch.bind(window);
-			window.fetch = async function(input, init){
-				init = init || {};
-				try{
-					if (auth0){
-						const token = await auth0.getTokenSilently().catch(()=>null);
-						if (token){
-							init.headers = Object.assign({}, init.headers || {}, { 'Authorization': 'Bearer ' + token });
-							// remove credentials so browser doesn't try to send cookies cross-site
-							if (init.credentials) delete init.credentials;
-						}
+	// Override global fetch to attach Authorization header when we have an access token.
+	// Falls back to existing credentialed cookie requests when no token is available.
+	(function overrideFetch(){
+		const _fetch = window.fetch.bind(window);
+		window.fetch = async function(input, init){
+			init = init || {};
+			try{
+				if (auth0){
+					const token = await auth0.getTokenSilently().catch(()=>null);
+					if (token){
+						init.headers = Object.assign({}, init.headers || {}, { 'Authorization': 'Bearer ' + token });
+						// remove credentials so browser doesn't try to send cookies cross-site
+						if (init.credentials) delete init.credentials;
 					}
-				}catch(e){ console.warn('auth token fetch error', e); }
-				return _fetch(input, init);
-			};
-		})();
+				}
+			}catch(e){ console.warn('auth token fetch error', e); }
+			return _fetch(input, init);
+		};
+	})();
 
 
 	const landing = document.getElementById('landing-choices');
