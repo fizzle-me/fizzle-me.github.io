@@ -1,5 +1,50 @@
-document.addEventListener('DOMContentLoaded', () => {
-	const API_BASE = "https://fizzle-backend.up.railway.app";
+	document.addEventListener('DOMContentLoaded', () => {
+		const API_BASE = "https://fizzle-backend.up.railway.app";
+
+		// --- Auth0 configuration (replace these with your values) ---
+		const AUTH0_DOMAIN = 'dev-x84kenbbkvst5xz0.us.auth0.com'; // e.g. dev-abc123.us.auth0.com
+		const AUTH0_CLIENT_ID = 'xqI63wBjWnIaigUhxgAjzDa3Ey93P4pG';
+		const AUTH0_AUDIENCE = 'https://Fizzle-API'; // e.g. https://fizzle-api
+		let auth0 = null;
+
+		async function initAuth(){
+			if (typeof createAuth0Client !== 'function'){
+				console.warn('Auth0 SDK not loaded. Add <script src="https://cdn.auth0.com/js/auth0-spa-js/1.27.0/auth0-spa-js.production.js"></script> to your HTML.');
+				return;
+			}
+			auth0 = await createAuth0Client({
+				domain: AUTH0_DOMAIN,
+				client_id: AUTH0_CLIENT_ID,
+				audience: AUTH0_AUDIENCE,
+				cacheLocation: 'localstorage'
+			});
+			// handle redirect callback from Auth0
+			if (window.location.search.includes('code=') && window.location.search.includes('state=')){
+				try{ await auth0.handleRedirectCallback(); }catch(e){ console.warn('Auth0 callback handling failed', e); }
+				history.replaceState({}, document.title, '/');
+			}
+		}
+
+		// Override global fetch to attach Authorization header when we have an access token.
+		// Falls back to existing credentialed cookie requests when no token is available.
+		(function overrideFetch(){
+			const _fetch = window.fetch.bind(window);
+			window.fetch = async function(input, init){
+				init = init || {};
+				try{
+					if (auth0){
+						const token = await auth0.getTokenSilently().catch(()=>null);
+						if (token){
+							init.headers = Object.assign({}, init.headers || {}, { 'Authorization': 'Bearer ' + token });
+							// remove credentials so browser doesn't try to send cookies cross-site
+							if (init.credentials) delete init.credentials;
+						}
+					}
+				}catch(e){ console.warn('auth token fetch error', e); }
+				return _fetch(input, init);
+			};
+		})();
+
 
 	const landing = document.getElementById('landing-choices');
 	const app = document.getElementById('message-app');
@@ -46,6 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
 									<div class="muted small">${relativeTime(m.ts)}</div>
 									<strong style="word-break:break-word">${renderMarkdown(m.title)}</strong>
 									<div class="owner-note small-note" style="margin-top:8px;color:#0ea5e9;font-weight:600;display:none">You</div>
+									<div class="muted small comment-count" style="margin-top:8px">Comments: ${(Array.isArray(m.comments)?m.comments.length:0)}</div>
+									<div class="muted small comment-count" style="margin-top:8px">Comments: ${(Array.isArray(m.comments)?m.comments.length:0)}</div>
 								</div>
 							</div>
 						</div>
@@ -57,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const imgWrapSearch = li.querySelector('.post-image');
 				if (m.image){
 					if (imgWrapSearch){ const img = imgWrapSearch.querySelector('img'); if (img) img.src = m.image; if (imgWrapSearch.parentElement !== li){ imgWrapSearch.remove(); li.insertBefore(imgWrapSearch, li.firstChild); } }
-					else { const div = document.createElement('div'); div.className = 'post-image'; div.innerHTML = `<img src=\"${m.image}\" alt=\"post image\"/>`; li.insertBefore(div, li.firstChild); }
+					else { const div = document.createElement('div'); div.className = 'post-image'; div.style.width = '100%'; div.style.display = 'block'; div.style.marginBottom = '8px'; div.innerHTML = `<img src=\"${m.image}\" alt=\"post image\" style=\"max-width:100%;height:auto;display:block;border-radius:6px\"/>`; li.insertBefore(div, li.firstChild); }
 				} else { if (imgWrapSearch) imgWrapSearch.remove(); }
 				// attach vote handlers similarly
 				const vb = li.querySelector('.vote-box');
@@ -314,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	async function fetchCurrent(){
-		try{
+		try {
 			console.log('Fetching current from', API_BASE + '/api/current');
 			const res = await fetch(API_BASE + '/api/current', {credentials: 'include'});
 			if (!res.ok){
@@ -329,12 +376,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			console.log('Current user response', data);
 			if (data && data.user) return data.user;
 			// fallback: check temporary client-side session set immediately after signup/signin
-			try{
+			try {
 				const tmp = localStorage.getItem('fizzle_current');
 				if (tmp) return JSON.parse(tmp);
-			}catch(e){}
+			} catch(e){}
 			return null;
-		}catch(e){
+		} catch(e){
 			console.error('fetchCurrent error', e);
 			return null;
 		}
@@ -370,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		loadingNote.textContent = 'Loading…';
 		if (!document.getElementById('loading-note')) messagesEl.appendChild(loadingNote);
 		sort = sort || (document.getElementById('sort-select') && document.getElementById('sort-select').value) || 'trending';
-		try{
+		try {
 			const res = await fetch(API_BASE + '/api/messages?sort=' + encodeURIComponent(sort), { credentials: 'include' });
 			const data = await res.json();
 			// remove loading note
@@ -386,6 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (commentsPagesBottomEl) commentsPagesBottomEl.style.display = 'none';
 				return;
 			}
+
 			const start = page * PAGE_SIZE;
 			const slice = all.slice(start, start + PAGE_SIZE);
 			// build maps of existing items
@@ -459,6 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					const voteCount = li.querySelector('.vote-count'); if (voteCount) voteCount.textContent = score;
 					const titleEl = li.querySelector('strong'); if (titleEl) titleEl.innerHTML = renderMarkdown(m.title);
 					const timeEl = li.querySelector('.post-content .muted.small'); if (timeEl) timeEl.textContent = relativeTime(m.ts);
+					const ccEl = li.querySelector('.comment-count'); if (ccEl) ccEl.textContent = 'Comments: ' + ((m.comments && m.comments.length) ? m.comments.length : 0);
 					// author text intentionally omitted (use owner highlight instead)
 					const imgWrap = li.querySelector('.post-image');
 						if (m.image){
@@ -466,12 +515,13 @@ document.addEventListener('DOMContentLoaded', () => {
 								const img = imgWrap.querySelector('img'); if (img) img.src = m.image;
 								// ensure the image block is a direct child of the li and placed before the content row
 								if (imgWrap.parentElement !== li){ imgWrap.remove(); li.insertBefore(imgWrap, li.firstChild); }
-							} else {
-								const div = document.createElement('div');
-								div.className = 'post-image';
-								div.innerHTML = `<img src="${m.image}" alt="post image"/>`;
-								li.insertBefore(div, li.firstChild);
-							}
+									else {
+										const div = document.createElement('div');
+										div.className = 'post-image';
+										div.style.width = '100%'; div.style.display = 'block'; div.style.marginBottom = '8px';
+										div.innerHTML = `<img src="${m.image}" alt="post image" style="max-width:100%;height:auto;display:block;border-radius:6px"/>`;
+										li.insertBefore(div, li.firstChild);
+									}
 						} else {
 							if (imgWrap) imgWrap.remove();
 						}
@@ -566,10 +616,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (typeof updatePageInfo === 'function') updatePageInfo(total);
 
 			// no separate open button; post element is clickable (handled when appended)
-		}catch(e){
-			messagesEl.innerHTML = '<li class="field">Failed to load messages</li>';
-			console.error('loadMessages error', e);
 		}
+	} catch(e) {
+		messagesEl.innerHTML = '<li class="field">Failed to load messages</li>';
+		console.error('loadMessages error', e);
 	}
 
 	if (msgForm){
@@ -704,7 +754,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (m.image){
 			const imageDiv = document.createElement('div');
 			imageDiv.className = 'modal-post-image';
-			imageDiv.innerHTML = `<img src="${m.image}" alt="post image"/>`;
+			imageDiv.style.width = '100%'; imageDiv.style.display = 'block'; imageDiv.style.marginBottom = '12px';
+			imageDiv.innerHTML = `<img src="${m.image}" alt="post image" style="max-width:100%;height:auto;display:block;border-radius:6px"/>`;
 			container.appendChild(imageDiv);
 		}
 
@@ -787,10 +838,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			</div>
 			<div id="modal-comments-list"></div>
 		`;
-		container.appendChild(commentsWrap);
-
-		// append top comment toggle panel below comments as requested
-		container.appendChild(topCommentWrap);
+				// insert top comment toggle directly under the comments header
+				const hh = commentsWrap.querySelector('h3');
+				if (hh){ hh.parentNode.insertBefore(topCommentWrap, hh.nextSibling); }
+				else { commentsWrap.insertBefore(topCommentWrap, commentsWrap.firstChild); }
+				container.appendChild(commentsWrap);
 
 		// modal bottom controls: duplicate comment pages and back-to-top inside modal
 		const modalBottom = document.createElement('div');
@@ -1068,7 +1120,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 		}
 
-	(async ()=>{
+	( async ()=>{
+		// initialize Auth0 client (if SDK is present)
+		await initAuth();
 		// immediate local fallback: if a temporary client session exists, show app immediately
 		let tmpUser = null;
 		try{ tmpUser = JSON.parse(localStorage.getItem('fizzle_current') || 'null'); }catch(e){ tmpUser = null; }
@@ -1083,25 +1137,45 @@ document.addEventListener('DOMContentLoaded', () => {
 		const user = await fetchCurrent();
 		if (user){
 			CURRENT_USER = user;
+			try{ localStorage.setItem('fizzle_current', JSON.stringify(user)); }catch(e){}
 			if (landing) landing.style.display = 'none';
 			if (app) app.style.display = 'block';
 			if (signedInAs) signedInAs.textContent = 'Signed in as: ' + user.email;
 			const signoutBtn = document.getElementById('signoutBtn');
 			if (signoutBtn){
 				signoutBtn.addEventListener('click', async ()=>{
-					try{
-						await fetch(API_BASE + '/api/signout', {method:'POST', credentials:'include'});
-					}catch(e){console.warn(e)}
+					if (auth0){
+						// logout via Auth0 (will redirect to returnTo)
+						auth0.logout({ returnTo: window.location.origin });
+						return;
+					}
+					try{ await fetch(API_BASE + '/api/signout', {method:'POST', credentials:'include'}); }catch(e){ console.warn(e); }
 					CURRENT_USER = null;
 					try{ localStorage.removeItem('fizzle_current'); }catch(e){}
 					if (landing) landing.style.display = 'block';
 					if (app) app.style.display = 'none';
 				});
 			}
+
+			// wire login/signup buttons (optional IDs in HTML)
+			const signinBtn = document.getElementById('signinBtn');
+			const signupBtn = document.getElementById('signupBtn');
+			function startLogin(opts){ if (!auth0){ alert('Auth0 not initialized'); return; } auth0.loginWithRedirect(Object.assign({ redirect_uri: window.location.origin }, opts || {})); }
+			if (signinBtn) signinBtn.addEventListener('click', ()=> startLogin());
+			if (signupBtn) signupBtn.addEventListener('click', ()=> startLogin({ screen_hint: 'signup' }));
 		} else if (!tmpUser){
 			if (landing) landing.style.display = 'block';
 			if (app) app.style.display = 'none';
 		}
+
+		// also wire login/signup buttons on landing when not signed in
+		try{
+			const signinBtn = document.getElementById('signinBtn');
+			const signupBtn = document.getElementById('signupBtn');
+			function startLogin(opts){ if (!auth0){ alert('Auth0 not initialized'); return; } auth0.loginWithRedirect(Object.assign({ redirect_uri: window.location.origin }, opts || {})); }
+			if (signinBtn) signinBtn.addEventListener('click', ()=> startLogin());
+			if (signupBtn) signupBtn.addEventListener('click', ()=> startLogin({ screen_hint: 'signup' }));
+		}catch(e){}
 
 		// wire file chooser nicer UI
 		const fileBtn = document.querySelector('.file-btn');
@@ -1158,5 +1232,5 @@ document.addEventListener('DOMContentLoaded', () => {
 		const sortEl = document.getElementById('sort-select');
 		if (sortEl) sortEl.addEventListener('change', (e)=> loadMessages(PAGE, e.target.value));
 	})();
-});
-
+	};
+})();
