@@ -1231,6 +1231,6 @@
 		
 		const sortEl = document.getElementById('sort-select');
 		if (sortEl) sortEl.addEventListener('change', (e)=> loadMessages(PAGE, e.target.value));
-	})();
+	});
 	};
-})();
+});
